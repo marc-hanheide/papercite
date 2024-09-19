@@ -1,3 +1,16 @@
 cache
 _repos
 _tests
+vendor
+*.lock
+.idea
+*.html
+/tests/converted.csl.json
+/tests/converted.raw.json
+/tests/papercite-cache/
+ppc_*
+*.bib
+*.sublime-workspace
+*.bak
+.fuse*
+*.json

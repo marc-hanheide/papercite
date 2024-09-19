@@ -12,18 +12,7 @@
 
 require_once("bibtex_common.php");
 
-/**
- * A page range
- */
-class PaperciteBibtexPages {
-  function PaperciteBibtexPages($start, $end) {
-    $this->start = (int)$start;
-    $this->end = (int)$end;
-  }
-  function count() {
-    return ($this->start ? 1 : 0) + ($this->end ? 1 : 0);
-  }
-}
+
 
 /** Incremental way of finding the closing delimiter */
 class PaperciteIncrementalClosingDelimiter {
@@ -174,8 +163,9 @@ class PaperciteBibTexEntries {
 		if($oldString[$lg-1] == "}" || $oldString[$lg-1] == ")" || $oldString[$lg-1] == ",")
 			$oldString = substr($oldString,0,$lg-1);
 		// $oldString = rtrim($oldString, "}),");
-		$split = preg_split("/=/", $oldString, 2);
+		$split  = preg_split("/=/", $oldString, 2);
 		$string = $split[1];
+		$values = array();
 		while($string)
 		{
 			list($entry, $string) = $this->fieldSplit($string);
@@ -507,7 +497,14 @@ class PaperciteBibTexEntries {
     // -1- x is not alphanumeric
     $text = preg_replace_callback("#$slash([^a-zA-Z])(.)#", "PaperciteBibTexEntries::_accents_cb", $text);
     // -2- \xy followed by a non-alphanumeric character
-    $text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "PaperciteBibTexEntries::_accents_cb", $text);
+	$text = preg_replace_callback("#$slash([a-zA-Z])(.)(?![a-zA-Z])#", "PaperciteBibTexEntries::_accents_cb", $text);
+	
+	// --- Handles common latex macros
+	$text = str_replace(
+		array('\\textendash', '\\textemdash', '\\textquoteright', '\\textquoteleft', '--'), 
+		array("–", "—", "’", "‘", '–'),
+		$text
+	);
   }
 
   static $accents = array(
@@ -646,7 +643,7 @@ class PaperciteBibTexEntries {
     }
 
     // Remove braces and handles capitalization
-    foreach(array("title","booktitle", "journal") as $f)
+    foreach(array("title", "booktitle", "journal", "publisher", "location") as $f)
       if (in_array($f, array_keys($ret))) 
 	$ret[$f] = $this->formatTitle($ret[$f]);
     
